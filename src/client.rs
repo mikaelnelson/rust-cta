@@ -3,6 +3,11 @@ use std::collections::{HashMap};
 
 use ureq;
 
+#[cfg(test)]
+#[path = "./client_test.rs"]
+mod client_test;
+
+
 #[allow(dead_code)]
 pub struct ParamBuilder {
     key: String
@@ -86,12 +91,12 @@ impl CTAClient {
 
         let resp = match ureq::get(&url).call() {
             Ok(resp) => resp,
-            Err(e) => return Err(CTAClientError::RequestFailed)
+            Err(_e) => return Err(CTAClientError::RequestFailed)
         };
 
         let resp_json = match resp.into_string() {
             Ok(resp_json) => resp_json,
-            Err(e) => return Err(CTAClientError::RequestFailed)
+            Err(_e) => return Err(CTAClientError::RequestFailed)
         };
 
         Ok(resp_json)
@@ -115,50 +120,4 @@ impl CTAClient {
         Ok(data)
     }
 
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn param_builder_build_no_params() {
-        let input_params: HashMap<String, String> = HashMap::new();
-
-        let expected_params = HashMap::from([
-            (String::from("key"), String::from("TESTKEY")),
-            (String::from("outputType"), String::from("JSON"))
-        ]);
-        
-        let pb = ParamBuilder::new(String::from("TESTKEY"));
-
-        assert_eq!( expected_params, pb.build(input_params));
-    }
-
-    #[test]
-    fn param_builder_build_params() {
-        let input_params = HashMap::from([
-            (String::from("mapid"), String::from("12345"))
-        ]);
-
-        let expected_params = HashMap::from([
-            (String::from("key"), String::from("TESTKEY")),
-            (String::from("outputType"), String::from("JSON")),
-            (String::from("mapid"), String::from("12345"))
-        ]);
-
-        let pb = ParamBuilder::new(String::from("TESTKEY"));
-
-        assert_eq!( expected_params, pb.build(input_params));
-    }
-
-    #[test]
-    fn cta_client_base_url() {
-        let cta_client = CTAClient::new(Some(String::from("TESTKEY")))
-            .unwrap();
-
-        let base_url = cta_client.base_url();
-
-        assert_eq!(String::from("http://lapi.transitchicago.com/api/1.0"), base_url);
-    }
 }
