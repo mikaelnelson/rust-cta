@@ -1,7 +1,5 @@
 use std::env;
-use std::collections::{BTreeMap};
-
-use ureq;
+use std::collections::BTreeMap;
 
 #[cfg(test)]
 #[path="./client_test.rs"]
@@ -30,8 +28,8 @@ pub struct CTAClient {
 impl CTAClient {
     pub fn new(key: Option<String>) -> Result<Self, CTAClientError> {
         let cta_key = key
-            .unwrap_or(env::var("CTA_KEY")
-                .unwrap_or(String::new())
+            .unwrap_or_else(|| env::var("CTA_KEY")
+                .unwrap_or_default()
             );
 
         if cta_key.is_empty() {
@@ -43,26 +41,26 @@ impl CTAClient {
             version: 1.0,
             max_number_params: 4,
             params:BTreeMap::from([
-                            (String::from("key"), String::from(cta_key)),
+                            (String::from("key"), cta_key),
                             (String::from("outputType"), String::from("JSON"))
                             ]),
         })
     }
 
     fn base_url(&self) -> String {
-        return format!("{}/{:.1}", self.url, self.version);
+        format!("{}/{:.1}", self.url, self.version)
     }
 
     fn build_url(&self, url: String) -> String {
-        return format!(
+        format!(
             "{}?{}", 
             url, 
-            (&self.params)
-                .into_iter()
+            self.params
+                .iter()
                 .map(|(k, v)| format!("{k}={v}"))
                 .collect::<Vec<String>>()
                 .join("&")
-            );
+            )
     }
 
     fn send_request(&self, url: String) -> Result<String, CTAClientError> {

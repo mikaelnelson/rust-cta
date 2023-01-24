@@ -55,11 +55,11 @@ impl Arrival {
             stop_destination: String::from(&eta.stp_de),
             station_name: String::from(&eta.sta_nm),
             destination_name: String::from(&eta.dest_nm),
-            arrival_time: arrival_time,
-            current_time: current_time,
-            is_delayed: eta.is_dly.contains("1"),
-            is_scheduled: eta.is_sch.contains("1"),
-            is_due: eta.is_app.contains("1")
+            arrival_time,
+            current_time,
+            is_delayed: eta.is_dly.eq("1"),
+            is_scheduled: eta.is_sch.eq("1"),
+            is_due: eta.is_app.eq("1")
         }
     }
 }
@@ -70,8 +70,8 @@ pub struct Arrivals {
 
 impl fmt::Display for Arrivals {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", (&self.arrivals)
-                            .into_iter()
+        write!(f, "{}", self.arrivals
+                            .iter()
                             .map(|arrival| format!("{}", arrival))
                             .collect::<Vec<String>>()
                             .join("\n"))
@@ -83,7 +83,7 @@ impl Arrivals {
         Arrivals{
             arrivals: etas
                         .into_iter()
-                        .map(|eta| Arrival::new(eta))
+                        .map(Arrival::new)
                         .collect()
         }
     }
@@ -113,8 +113,7 @@ impl ETAResponse {
         let etas = root.ctatt.eta;
         let arrivals = Arrivals::new(etas);
 
-        ETAResponse { arrivals: arrivals }
-
+        ETAResponse { arrivals }
     }
 }
 

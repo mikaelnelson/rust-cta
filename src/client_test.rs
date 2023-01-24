@@ -5,8 +5,7 @@ mod cta_client_tests {
 
     #[fixture]
     fn cta_client() -> CTAClient {
-        return CTAClient::new(Some(String::from("TESTKEY"))).unwrap();
-
+        CTAClient::new(Some(String::from("TESTKEY"))).unwrap()
     }
 
     #[rstest]
