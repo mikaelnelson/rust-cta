@@ -4,8 +4,12 @@ use std::collections::{BTreeMap};
 use ureq;
 
 #[cfg(test)]
-#[path = "./client_test.rs"]
+#[path="./client_test.rs"]
 mod client_test;
+
+#[path="./responses.rs"]
+mod responses;
+use responses::*;
 
 #[derive(Debug)]
 pub enum CTAClientError {
@@ -90,12 +94,13 @@ impl CTAClient {
         self
     }
 
-    pub fn arrivals(&self) -> Result<String, CTAClientError> {
+    pub fn arrivals(&self) -> Result<ETAResponse, CTAClientError> {
 
         if !self.params.contains_key("mapid") && !self.params.contains_key("stpid") {
             return Err(CTAClientError::RequiredArgMissing);
         }
-        Ok(self.send_request(format!("{}/ttarrivals.aspx", self.base_url()))?)
+
+        Ok(ETAResponse::new(self.send_request(format!("{}/ttarrivals.aspx", self.base_url()))?))
     }
 
 }
