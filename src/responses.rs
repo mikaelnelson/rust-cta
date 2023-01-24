@@ -3,7 +3,12 @@ use std::fmt;
 
 use serde_derive::Deserialize;
 use 
-serde_json::{Value};
+serde_json::Value;
+
+use chrono::prelude::*;
+use chrono::{DateTime, NaiveDateTime};
+use chrono_tz::US::Central;
+use chrono_tz::Tz;
 
 // // #[derive(Debug)]
 // pub enum ResponsesError {
@@ -12,18 +17,50 @@ serde_json::{Value};
 // }
 
 pub struct Arrival {
-    arrival_time: String
+    stop_destination: String,
+    station_name: String,
+    destination_name: String,
+    arrival_time: DateTime<Tz>,
+    current_time: DateTime<Tz>,
+    is_delayed: bool,
+    is_scheduled: bool,
+    is_due: bool
 }
 
 impl fmt::Display for Arrival {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.arrival_time)
+        let arrives_min = self.arrival_time
+            .signed_duration_since(self.current_time)
+            .num_minutes();
+
+        write!(f, "{} arrives in {} {}", 
+            self.stop_destination, 
+            arrives_min, 
+            if arrives_min == 1 {"minute"} else {"minutes"}
+        )
     }
 }
 
 impl Arrival {
     pub fn new(eta: Eta) -> Self {
-        Arrival{arrival_time: String::from(eta.arr_t)}
+
+        let arrival_time = NaiveDateTime::parse_from_str(&eta.arr_t, "%Y-%m-%dT%H:%M:%S")
+            .unwrap()
+            .and_local_timezone(Central)
+            .unwrap();
+
+        let current_time = Utc::now().with_timezone(&Central);
+
+        Arrival{
+            stop_destination: String::from(&eta.stp_de),
+            station_name: String::from(&eta.sta_nm),
+            destination_name: String::from(&eta.dest_nm),
+            arrival_time: arrival_time,
+            current_time: current_time,
+            is_delayed: eta.is_dly.contains("1"),
+            is_scheduled: eta.is_sch.contains("1"),
+            is_due: eta.is_app.contains("1")
+        }
     }
 }
 
