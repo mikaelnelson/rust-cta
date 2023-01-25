@@ -23,8 +23,18 @@ fn main() {
         println!("{dest}");
     }
 
-    // match cta_client.stpid(String::from("30115")).arrivals() {
-    //     Ok(arrivals) => println!("{arrivals}"),
-    //     Err(e) => println!("{:?}", e)
-    // };
+    println!("Trains Due:");
+    for dest in resp.arrivals.by_due() {
+        println!("{dest}");
+    }
+
+    println!("Trains Scheduled:");
+    for dest in resp.arrivals.by_scheduled() {
+        println!("{dest}");
+    }
+
+    println!("Trains Live:");
+    for dest in resp.arrivals.by_live() {
+        println!("{dest}");
+    }
 }

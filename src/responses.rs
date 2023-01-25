@@ -1,4 +1,3 @@
-
 use std::fmt;
 
 use serde_derive::Deserialize;
@@ -83,6 +82,7 @@ impl fmt::Display for Arrivals {
     }
 }
 
+#[allow(dead_code)]
 impl Arrivals {
     pub fn new(etas: Vec<Eta>) -> Self {   
         Arrivals{
@@ -100,6 +100,42 @@ impl Arrivals {
                 a.destination_name.eq(&dest)
             }).collect()
     }
+
+    pub fn by_route_number(&self, route_number: String) -> Vec<&Arrival> {
+        self.arrivals.iter()
+            .filter(|a| {
+                a.route_number.eq(&route_number)
+            }).collect()
+    }
+
+    pub fn by_due(&self) -> Vec<&Arrival> {
+        self.arrivals.iter()
+            .filter(|a| {
+                a.is_due
+            }).collect()
+    }
+
+    pub fn by_delayed(&self) -> Vec<&Arrival> {
+        self.arrivals.iter()
+            .filter(|a| {
+                a.is_delayed
+            }).collect()
+    }
+
+    pub fn by_scheduled(&self) -> Vec<&Arrival> {
+        self.arrivals.iter()
+            .filter(|a| {
+                a.is_scheduled
+            }).collect()
+    }
+
+    pub fn by_live(&self) -> Vec<&Arrival> {
+        self.arrivals.iter()
+            .filter(|a| {
+                !a.is_scheduled
+            }).collect()
+    }
+
 }
 
 pub struct ETAResponse {
