@@ -2,19 +2,18 @@
 use std::fmt;
 
 use serde_derive::Deserialize;
-use 
-serde_json::Value;
+use serde_json::Value;
 
 use chrono::prelude::*;
 use chrono::{DateTime, NaiveDateTime};
 use chrono_tz::US::Central;
 use chrono_tz::Tz;
 
-// // #[derive(Debug)]
-// pub enum ResponsesError {
-//     BadResponse,
-//     NoTrain
-// }
+#[derive(Debug)]
+pub enum ResponseError {
+    ParsingFailed,
+    NoTrain
+}
 
 pub struct Arrival {
     stop_destination: String,
@@ -100,20 +99,15 @@ impl fmt::Display for ETAResponse {
 }
 
 impl ETAResponse {
-    pub fn new(data: String) -> Self {
+    pub fn new(data: String) -> Result<Self, ResponseError> {
+        let root = serde_json::from_str::<Root>(&data)
+            .map_err(|_err: serde_json::Error| {
+                ResponseError::ParsingFailed
+            })?;
 
-        // let root: Result<Root, ResponsesError> = match serde_json::from_str(&data) {
-        //     Ok(root) => root,
-        //     Err(_e) => Err(ResponsesError::BadResponse)
-        // };
-
-        // Ok(ETAResponse { arrivals: root })
-
-        let root: Root = serde_json::from_str(&data).unwrap();
-        let etas = root.ctatt.eta;
-        let arrivals = Arrivals::new(etas);
-
-        ETAResponse { arrivals }
+        Ok(ETAResponse {
+            arrivals: Arrivals::new(root.ctatt.eta)
+        })
     }
 }
 

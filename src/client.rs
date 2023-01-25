@@ -7,7 +7,7 @@ mod client_test;
 
 #[path="./responses.rs"]
 mod responses;
-use responses::*;
+use responses::{ETAResponse, ResponseError};
 
 #[derive(Debug)]
 pub enum CTAClientError {
@@ -98,7 +98,11 @@ impl CTAClient {
             return Err(CTAClientError::RequiredArgMissing);
         }
 
-        Ok(ETAResponse::new(self.send_request(format!("{}/ttarrivals.aspx", self.base_url()))?))
+        ETAResponse::new(
+            self.send_request(format!("{}/ttarrivals.aspx", self.base_url()))?)
+                .map_err(|_err: ResponseError| {
+                    CTAClientError::RequestFailed
+                })
     }
 
 }
