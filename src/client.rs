@@ -25,6 +25,7 @@ pub struct CTAClient {
     params: BTreeMap<String, String>
 }
 
+#[allow(dead_code)]
 impl CTAClient {
     pub fn new(key: Option<String>) -> Result<Self, CTAClientError> {
         let cta_key = key

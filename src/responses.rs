@@ -9,16 +9,20 @@ use chrono::{DateTime, NaiveDateTime};
 use chrono_tz::US::Central;
 use chrono_tz::Tz;
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub enum ResponseError {
     ParsingFailed,
     NoTrain
 }
 
+#[allow(dead_code)]
 pub struct Arrival {
     stop_destination: String,
     station_name: String,
     destination_name: String,
+    destination_number: String,
+    route_number: String,
     arrival_time: DateTime<Tz>,
     current_time: DateTime<Tz>,
     is_delayed: bool,
@@ -54,6 +58,8 @@ impl Arrival {
             stop_destination: String::from(&eta.stp_de),
             station_name: String::from(&eta.sta_nm),
             destination_name: String::from(&eta.dest_nm),
+            destination_number: String::from(&eta.dest_st),
+            route_number: String::from(&eta.rn),
             arrival_time,
             current_time,
             is_delayed: eta.is_dly.eq("1"),
@@ -78,7 +84,7 @@ impl fmt::Display for Arrivals {
 }
 
 impl Arrivals {
-    pub fn new(etas: Vec<Eta>) -> Self {
+    pub fn new(etas: Vec<Eta>) -> Self {   
         Arrivals{
             arrivals: etas
                         .into_iter()
@@ -86,10 +92,18 @@ impl Arrivals {
                         .collect()
         }
     }
+
+    pub fn by_destination(&self, dest: String) -> Vec<&Arrival> {
+        self.arrivals.iter()
+            .filter(|a| {
+                a.destination_number.eq(&dest) || 
+                a.destination_name.eq(&dest)
+            }).collect()
+    }
 }
 
 pub struct ETAResponse {
-    arrivals: Arrivals
+    pub arrivals: Arrivals
 }
 
 impl fmt::Display for ETAResponse {
