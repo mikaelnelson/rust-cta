@@ -32,9 +32,9 @@ pub struct Arrival {
 
 impl fmt::Display for Arrival {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let arrives_min = self.arrival_time
+        let arrives_min = (self.arrival_time
             .signed_duration_since(self.current_time)
-            .num_minutes();
+            .num_seconds() + (60/2)) / 60;
 
         write!(f, "{} arrives in {} {}", 
             self.stop_destination, 
