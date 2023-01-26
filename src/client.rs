@@ -1,3 +1,4 @@
+use std::fmt;
 use std::env;
 use std::collections::BTreeMap;
 
@@ -9,7 +10,7 @@ mod client_test;
 mod responses;
 use responses::{ETAResponse, ResponseError};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum CTAClientError {
     MissingCTAKey,
     RequiredArgMissing,
@@ -17,12 +18,19 @@ pub enum CTAClientError {
 }
 
 #[allow(dead_code)]
+#[derive(Debug)]
 pub struct CTAClient {
 
     url: String,
     version: f32,
     max_number_params: u32,
     params: BTreeMap<String, String>
+}
+
+impl fmt::Display for CTAClient {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "CTAClient")
+    }
 }
 
 #[allow(dead_code)]
