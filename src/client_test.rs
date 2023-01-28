@@ -1,18 +1,10 @@
 mod cta_client_tests {
-    use crate::client::{CTAClient, CTAClientError};
+    use crate::client::CTAClient;
     use rstest::*;
 
     #[fixture]
     fn cta_client() -> CTAClient {
-        CTAClient::new(Some(String::from("TESTKEY"))).unwrap()
-    }
-
-    #[rstest]
-    fn cta_client_new_fail() {
-        let cta_client = CTAClient::new(None);
-
-        assert!(cta_client.is_err());
-        assert_eq!(cta_client.unwrap_err(), CTAClientError::MissingCTAKey);
+        CTAClient::new(String::from("TESTKEY"))
     }
 
     #[rstest]

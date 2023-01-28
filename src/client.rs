@@ -1,5 +1,4 @@
 use std::fmt;
-use std::env;
 use std::collections::BTreeMap;
 
 #[cfg(test)]
@@ -12,7 +11,6 @@ use responses::{ETAResponse, ResponseError};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum CTAClientError {
-    MissingCTAKey,
     RequiredArgMissing,
     RequestFailed
 }
@@ -35,17 +33,8 @@ impl fmt::Display for CTAClient {
 
 #[allow(dead_code)]
 impl CTAClient {
-    pub fn new(key: Option<String>) -> Result<Self, CTAClientError> {
-        let cta_key = key
-            .unwrap_or_else(|| env::var("CTA_KEY")
-                .unwrap_or_default()
-            );
-
-        if cta_key.is_empty() {
-            return Err(CTAClientError::MissingCTAKey);
-        }
-
-        Ok(CTAClient {
+    pub fn new(cta_key: String) -> Self {
+        CTAClient {
             url: String::from("http://lapi.transitchicago.com/api"),
             version: 1.0,
             max_number_params: 4,
@@ -53,7 +42,7 @@ impl CTAClient {
                             (String::from("key"), cta_key),
                             (String::from("outputType"), String::from("JSON"))
                             ]),
-        })
+        }
     }
 
     fn base_url(&self) -> String {

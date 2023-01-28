@@ -1,3 +1,5 @@
+use std::env;
+
 mod client;
 use client::CTAClient;
 
@@ -5,7 +7,7 @@ use dotenv::dotenv;
 
 fn main() {
     dotenv().ok();   
-    let cta_client = CTAClient::new(None).unwrap();
+    let cta_client = CTAClient::new(env::var("CTA_KEY").unwrap());
 
     let resp = match cta_client.mapid(String::from("40590")).arrivals() {
         Ok(arrivals) => arrivals,
