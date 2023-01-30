@@ -1,5 +1,5 @@
 mod cta_client_tests {
-    use crate::client::CTAClient;
+    use crate::client::{CTAClient, CTAClientError};
     use rstest::*;
 
     #[fixture]
@@ -15,7 +15,6 @@ mod cta_client_tests {
     }
 
     #[rstest]
-    #[case(Vec::from([]), "www.example.com/test.aspx?key=TESTKEY&outputType=JSON")]
     #[case(Vec::from([("mapid", "12345")]), "www.example.com/test.aspx?key=TESTKEY&mapid=12345&outputType=JSON")]
     #[case(Vec::from([("stpid", "12345")]), "www.example.com/test.aspx?key=TESTKEY&outputType=JSON&stpid=12345")]
     #[case(Vec::from([("stpid", "12345"), 
@@ -38,6 +37,15 @@ mod cta_client_tests {
 
         let url = cta_client.build_url(String::from("www.example.com/test.aspx"));
 
-        assert_eq!(String::from(expected), url);
+        assert!(url.is_ok());
+        assert_eq!(String::from(expected), url.unwrap());
+    }
+
+    #[rstest]
+    fn cta_client_build_url_fail(cta_client: CTAClient) {
+        let url = cta_client.build_url(String::from("www.example.com/test.aspx"));
+
+        assert!(url.is_err());
+        assert_eq!(CTAClientError::RequiredArgMissing, url.unwrap_err());
     }
 }

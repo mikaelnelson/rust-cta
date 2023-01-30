@@ -1,12 +1,29 @@
 use std::env;
 
 mod client;
-use client::CTAClient;
+use client::{CTAClient, CTAClientError, CTAClientRequest};
 
 use dotenv::dotenv;
 
+impl CTAClientRequest for CTAClient {
+    fn get(&self, url: String) -> Result<String, CTAClientError> {
+        let resp = match ureq::get(&url).call() {
+            Ok(resp) => resp,
+            Err(_e) => return Err(CTAClientError::RequestFailed)
+        };
+
+        let resp_json = match resp.into_string() {
+            Ok(resp_json) => resp_json,
+            Err(_e) => return Err(CTAClientError::RequestFailed)
+        };
+
+        Ok(resp_json)
+    }
+}
+
 fn main() {
     dotenv().ok();   
+
     let cta_client = CTAClient::new(env::var("CTA_KEY").unwrap());
 
     let resp = match cta_client.mapid(String::from("40590")).arrivals() {

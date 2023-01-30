@@ -9,6 +9,11 @@ mod client_test;
 mod responses;
 use responses::{ETAResponse, ResponseError};
 
+
+pub trait CTAClientRequest {
+    fn get(&self, url: String) -> Result<String, CTAClientError>;
+}
+
 #[derive(Debug, PartialEq, Eq)]
 pub enum CTAClientError {
     RequiredArgMissing,
@@ -18,7 +23,6 @@ pub enum CTAClientError {
 #[allow(dead_code)]
 #[derive(Debug)]
 pub struct CTAClient {
-
     url: String,
     version: f32,
     max_number_params: u32,
@@ -49,8 +53,12 @@ impl CTAClient {
         format!("{}/{:.1}", self.url, self.version)
     }
 
-    fn build_url(&self, url: String) -> String {
-        format!(
+    fn build_url(&self, url: String) -> Result<String, CTAClientError> {
+        if !self.params.contains_key("mapid") && !self.params.contains_key("stpid") {
+            return Err(CTAClientError::RequiredArgMissing);
+        }
+
+        Ok(format!(
             "{}?{}", 
             url, 
             self.params
@@ -58,24 +66,7 @@ impl CTAClient {
                 .map(|(k, v)| format!("{k}={v}"))
                 .collect::<Vec<String>>()
                 .join("&")
-            )
-    }
-
-    fn send_request(&self, url: String) -> Result<String, CTAClientError> {
-
-        let url = self.build_url(url);
-
-        let resp = match ureq::get(&url).call() {
-            Ok(resp) => resp,
-            Err(_e) => return Err(CTAClientError::RequestFailed)
-        };
-
-        let resp_json = match resp.into_string() {
-            Ok(resp_json) => resp_json,
-            Err(_e) => return Err(CTAClientError::RequestFailed)
-        };
-
-        Ok(resp_json)
+            ))
     }
 
     pub fn mapid(mut self, mapid: String) -> Self {
@@ -90,14 +81,13 @@ impl CTAClient {
         self
     }
 
-    pub fn arrivals(&self) -> Result<ETAResponse, CTAClientError> {
-
-        if !self.params.contains_key("mapid") && !self.params.contains_key("stpid") {
-            return Err(CTAClientError::RequiredArgMissing);
-        }
+    pub fn arrivals(&self/*, request: &impl CTAClientRequest*/) -> Result<ETAResponse, CTAClientError> {
+        let resp = self.get(
+            self.build_url(
+                format!("{}/ttarrivals.aspx", self.base_url()))?)?;
 
         ETAResponse::new(
-            self.send_request(format!("{}/ttarrivals.aspx", self.base_url()))?)
+            resp)
                 .map_err(|_err: ResponseError| {
                     CTAClientError::RequestFailed
                 })
