@@ -5,7 +5,9 @@ use client::{CTAClient, CTAClientError, CTAClientRequest};
 
 use dotenv::dotenv;
 
-impl CTAClientRequest for CTAClient {
+struct Request();
+
+impl CTAClientRequest for Request {
     fn get(&self, url: String) -> Result<String, CTAClientError> {
         let resp = match ureq::get(&url).call() {
             Ok(resp) => resp,
@@ -26,7 +28,7 @@ fn main() {
 
     let cta_client = CTAClient::new(env::var("CTA_KEY").unwrap());
 
-    let resp = match cta_client.mapid(String::from("40590")).arrivals() {
+    let resp = match cta_client.mapid(String::from("40590")).arrivals(&Request()) {
         Ok(arrivals) => arrivals,
         Err(e) => panic!("{:?}", e)
     };

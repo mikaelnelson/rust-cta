@@ -81,8 +81,8 @@ impl CTAClient {
         self
     }
 
-    pub fn arrivals(&self/*, request: &impl CTAClientRequest*/) -> Result<ETAResponse, CTAClientError> {
-        let resp = self.get(
+    pub fn arrivals(&self, request: &dyn CTAClientRequest) -> Result<ETAResponse, CTAClientError> {
+        let resp = request.get(
             self.build_url(
                 format!("{}/ttarrivals.aspx", self.base_url()))?)?;
 

@@ -16,6 +16,7 @@ pub enum ResponseError {
 }
 
 #[allow(dead_code)]
+#[derive(Debug)]
 pub struct Arrival {
     stop_destination: String,
     station_name: String,
@@ -68,6 +69,7 @@ impl Arrival {
     }
 }
 
+#[derive(Debug)]
 pub struct Arrivals {
     arrivals: Vec<Arrival>
 }
@@ -138,6 +140,7 @@ impl Arrivals {
 
 }
 
+#[derive(Debug)]
 pub struct ETAResponse {
     pub arrivals: Arrivals
 }
